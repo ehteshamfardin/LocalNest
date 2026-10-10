@@ -581,9 +581,10 @@ class LocalShareHttpServer(
         }
 
         val contentLength = headers["content-length"]?.toLongOrNull() ?: 0L
-        val maxBytes = share.maxUploadSizeMb * 1024 * 1024
+        val maxBytes = share.maxUploadSizeMb * 1024L * 1024L
         if (contentLength > maxBytes) {
-            sendError(output, 413, "File exceeds maximum upload size of ${share.maxUploadSizeMb} MB", clientIp, "/api/shares/$shareId/upload")
+            val limitStr = if (share.maxUploadSizeMb >= 1024) "${share.maxUploadSizeMb / 1024} GB" else "${share.maxUploadSizeMb} MB"
+            sendError(output, 413, "File exceeds maximum upload size of $limitStr", clientIp, "/api/shares/$shareId/upload")
             return
         }
 

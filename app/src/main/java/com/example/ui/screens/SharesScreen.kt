@@ -268,7 +268,12 @@ fun ShareItemCard(
             ) {
                 // Upload permission badge
                 val (uploadText, uploadColor) = if (share.allowUploads) {
-                    Pair("Uploads Allowed (${share.maxUploadSizeMb}MB)", StatusGreen)
+                    val sizeLabel = if (share.maxUploadSizeMb >= 1024) {
+                        "${share.maxUploadSizeMb / 1024}GB"
+                    } else {
+                        "${share.maxUploadSizeMb}MB"
+                    }
+                    Pair("Uploads Allowed ($sizeLabel)", StatusGreen)
                 } else {
                     Pair("Read-only", MaterialTheme.colorScheme.primary)
                 }
@@ -386,7 +391,20 @@ fun CreateShareDialog(
     var enablePassword by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
     var expiresInHours by remember { mutableIntStateOf(0) } // 0 = never
-    var maxUploadMb by remember { mutableFloatStateOf(100f) }
+    val uploadLimitOptions = remember {
+        listOf(
+            Pair("100 MB", 100L),
+            Pair("500 MB", 500L),
+            Pair("1 GB", 1024L),
+            Pair("5 GB", 5120L),
+            Pair("10 GB", 10240L),
+            Pair("50 GB", 51200L),
+            Pair("100 GB", 102400L),
+            Pair("256 GB", 262144L),
+            Pair("512 GB", 524288L)
+        )
+    }
+    var selectedLimitIndex by remember { mutableFloatStateOf(8f) } // Default: 512 GB
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -428,13 +446,14 @@ fun CreateShareDialog(
                 }
 
                 if (allowUploads) {
+                    val currentOption = uploadLimitOptions[selectedLimitIndex.toInt().coerceIn(0, uploadLimitOptions.size - 1)]
                     Column {
-                        Text("Max Upload Size: ${maxUploadMb.toInt()} MB", fontSize = 12.sp)
+                        Text("Max Upload Size: ${currentOption.first}", fontSize = 12.sp)
                         Slider(
-                            value = maxUploadMb,
-                            onValueChange = { maxUploadMb = it },
-                            valueRange = 10f..500f,
-                            steps = 4
+                            value = selectedLimitIndex,
+                            onValueChange = { selectedLimitIndex = it },
+                            valueRange = 0f..(uploadLimitOptions.size - 1).toFloat(),
+                            steps = uploadLimitOptions.size - 2
                         )
                     }
                 }
@@ -467,13 +486,14 @@ fun CreateShareDialog(
             Button(
                 onClick = {
                     if (name.isNotBlank()) {
+                        val chosenLimitMb = uploadLimitOptions[selectedLimitIndex.toInt().coerceIn(0, uploadLimitOptions.size - 1)].second
                         onConfirm(
                             name.trim(),
                             description.trim(),
                             allowUploads,
                             if (enablePassword && password.isNotBlank()) password.trim() else null,
                             if (expiresInHours > 0) expiresInHours else null,
-                            maxUploadMb.toLong()
+                            chosenLimitMb
                         )
                     }
                 },

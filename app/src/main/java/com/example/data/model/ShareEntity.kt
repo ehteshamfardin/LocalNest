@@ -15,5 +15,5 @@ data class ShareEntity(
     val salt: String = "",
     val createdAt: Long = System.currentTimeMillis(),
     val expiresAt: Long? = null,
-    val maxUploadSizeMb: Long = 100L
+    val maxUploadSizeMb: Long = 524288L // 512 GB default
 )

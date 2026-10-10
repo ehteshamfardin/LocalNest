@@ -48,7 +48,7 @@ class LocalShareRepository(
         allowUploads: Boolean = false,
         password: String? = null,
         expiresAt: Long? = null,
-        maxUploadSizeMb: Long = 100L
+        maxUploadSizeMb: Long = 524288L
     ): ShareEntity = withContext(Dispatchers.IO) {
         val shareId = UUID.randomUUID().toString().take(8)
         val (hash, salt) = if (!password.isNullOrBlank()) {
