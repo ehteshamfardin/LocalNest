@@ -1,0 +1,6 @@
+{
+  "name": "LocalShare",
+  "description": "Premium personal file sharing network and local HTTP server with macOS-inspired file browser",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
